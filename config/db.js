@@ -12,11 +12,5 @@ const config = {
 };
 const pool = new Pool(config);
 
-//Prueba de conxión con la DB
-// const getDate = async () => {
-//     const result = await pool.query('SELECT NOW()');
-//     console.log(result.rows[0])
-// };
-// getDate();
 
 export default pool;
