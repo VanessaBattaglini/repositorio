@@ -1,19 +1,17 @@
 import express from 'express';
 const router = express.Router();
 import pool from '../config/db.js';
-import { showSongs, addSongs } from '../crud/queries.js';
+import { showSongs, addSongs, deleteSongs, updateSong } from "../crud/queries.js";
 import path from "path";
-import { fileURLToPath } from "node:url";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const filePath = path.join(__dirname, '../views/index.html');
+const __dirname = import.meta.dirname;
 
 
 //Ruta raíz
-router.get("/", (req, res) => {
-    console.log("views/index.html");
-    res.sendFile("views/index.html", { root: "." })
+router.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../views/index.html'))
 });
+
+
 //Prueba de conexión
 router.get("/date", async(req, res) => {
     const results = await pool.query('SELECT NOW()');
@@ -23,19 +21,33 @@ router.get("/date", async(req, res) => {
 //Mostrar canciones
 router.get("/canciones", async (req, res) => {
     const results = await showSongs();
-    console.log(results.rows);
-    res.json(results)
-});
-router.post("/cancion", async() => {
-    const { titulo, artista, tono } = req.body;
-    const cancion = [titulo, artista, tono];
-    const results = await pool.query(addSongs);
     res.json(results)
 });
 
-router.delete('/cancion', async (req, res) => {
-    
+//Insertar canciones
+router.post("/cancion", async(req, res) => {
+    const { titulo, artista, tono } = req.body;
+    const cancion = [titulo, artista, tono];
+    const results = await addSongs(cancion);
+    console.log(results.rows)
+    res.json(results)
 });
+//Borrar canciones
+router.delete('/cancion', async (req, res) => {
+    const { id } = req.query; //captura por url
+  const result = await deleteSongs(id);
+  res.send("Canción Eliminada");
+});
+
+//Editar canciones
+router.put('/cancion/:id', async (req, res) => {
+    const { id } = req.params;
+    const { titulo, artista, tono } = req.body;
+    const cancion = [titulo, artista, tono, id];
+    const results = await updateSong(cancion);
+    res.send('Cambios realizados con éxito');
+});
+
 
 
 
